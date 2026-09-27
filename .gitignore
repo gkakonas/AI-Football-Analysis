@@ -7,3 +7,8 @@ venv/
 # Video files
 *.mp4
 *.avi
+runs/
+
+# Models
+models/
+*.pt
