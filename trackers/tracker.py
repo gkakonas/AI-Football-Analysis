@@ -23,3 +23,8 @@ class Tracker:
             class_names_inv = {v: k for k, v in class_names.items()}
 
             detection_supervision = sv.Detections.from_ultralytics(detection)
+
+            # Convert goalkeeper to player, since we don't have any goalkeeper specific stats
+            for object_index, class_id in enumerate(detection_supervision.class_id):
+                if class_names[class_id] == "goalkeeper":
+                    detection_supervision.class_id[object_index] = class_names_inv["player"]
