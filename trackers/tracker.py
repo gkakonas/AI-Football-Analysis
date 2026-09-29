@@ -157,7 +157,8 @@ class Tracker:
 
             # Draw the circle under each player
             for track_id, player in player_dictionary.items():
-                frame = self.draw_player_circle(frame, player["bbox"], (0, 165, 255), track_id)
+                team_color = player.get("team_color", (0, 165, 255))
+                frame = self.draw_player_circle(frame, player["bbox"], team_color, track_id)
 
             # Draw the circle under each referee (We do not care about the track id for referees, so we will not draw it)
             for _, referee in referee_dictionary.items():
