@@ -4,9 +4,10 @@ __pycache__/
 .venv/
 venv/
 
-# Video files
+# Video and image files
 *.mp4
 *.avi
+*.jpg
 runs/
 
 # Models
