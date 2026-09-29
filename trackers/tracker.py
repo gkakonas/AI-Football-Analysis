@@ -4,6 +4,7 @@ import pickle
 import os
 import cv2
 import sys
+import numpy as np
 sys.path.append('../')
 from utilities import get_center_bbox, get_width_bbox
 
@@ -129,8 +130,23 @@ class Tracker:
 
         return frame
 
+
+    def draw_triangle(self, frame, bbox, color):
+        y = int(bbox[1])
+        x, _ = get_center_bbox(bbox)
+
+        triangle_points = np.array([
+            [x,y],
+            [x - 10, y - 20],
+            [x + 10, y - 20]
+        ])
+
+        cv2.drawContours(frame, [triangle_points], 0, color, cv2.FILLED)
+        cv2.drawContours(frame, [triangle_points], 0, (0, 0, 0), 2)
+
+        return frame
     
-    def draw_circles(self, video_frames, tracks):
+    def draw_tracking_markers(self, video_frames, tracks):
         output_frames = []
         for frame_num, frame in enumerate(video_frames):
             frame = frame.copy()
@@ -147,6 +163,10 @@ class Tracker:
             for _, referee in referee_dictionary.items():
                 frame = self.draw_player_circle(frame, referee["bbox"], (255, 0, 0), None)
 
+            # Draw the triangle under the ball
+            for track_id, ball in ball_dictionary.items():
+                frame = self.draw_triangle(frame, ball["bbox"], (0, 255, 0))
+            
             output_frames.append(frame)
             
         return output_frames
