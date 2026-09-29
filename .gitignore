@@ -12,3 +12,8 @@ runs/
 # Models
 models/
 *.pt
+
+# Env files
+.env
+.env.*
+!.env.example
