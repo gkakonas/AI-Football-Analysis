@@ -158,7 +158,30 @@ class Tracker:
 
         return frame
     
-    def draw_tracking_markers(self, video_frames, tracks):
+    def draw_team_possession(self, frame, frame_num, team_possession):
+        # Draw a semi transparent overlay to host the stat
+        overlay = frame.copy()
+        cv2.rectangle(overlay, (1350, 850), (1900, 970), (255, 255, 255), cv2.FILLED)
+        alpha = 0.4
+        cv2.addWeighted(overlay, alpha, frame, 1 - alpha, 0, frame)
+
+        team_possession_till_frame = np.asarray(team_possession[:frame_num + 1])
+        team_1_num_frames = np.count_nonzero(team_possession_till_frame == 1)
+        team_2_num_frames = np.count_nonzero(team_possession_till_frame == 2)
+        known_frames = team_1_num_frames + team_2_num_frames
+
+        if known_frames == 0:
+            return frame
+
+        team_1 = team_1_num_frames / known_frames
+        team_2 = team_2_num_frames / known_frames
+
+        cv2.putText(frame, f"Team 1 Possession: {team_1 * 100:.2f}%", (1400, 900), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 3)
+        cv2.putText(frame, f"Team 2 Possession: {team_2 * 100:.2f}%", (1400, 950), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 3)
+
+        return frame
+    
+    def draw_tracking_markers(self, video_frames, tracks, team_possession):
         output_frames = []
         for frame_num, frame in enumerate(video_frames):
             frame = frame.copy()
@@ -183,6 +206,9 @@ class Tracker:
             # Draw the triangle under the ball
             for track_id, ball in ball_dictionary.items():
                 frame = self.draw_triangle(frame, ball["bbox"], (0, 255, 0))
+
+            # Draw each team's ball possession
+            frame = self.draw_team_possession(frame, frame_num, team_possession)
             
             output_frames.append(frame)
             
