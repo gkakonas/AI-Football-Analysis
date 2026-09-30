@@ -172,6 +172,10 @@ class Tracker:
                 team_color = player.get("team_color", (0, 165, 255))
                 frame = self.draw_player_circle(frame, player["bbox"], team_color, track_id)
 
+                # Draw a red inverse triangle above the player who currently holds possession of the ball
+                if player.get('has_ball', False):
+                    frame = self.draw_triangle(frame, player["bbox"], (0, 0, 255))
+
             # Draw the circle under each referee (We do not care about the track id for referees, so we will not draw it)
             for _, referee in referee_dictionary.items():
                 frame = self.draw_player_circle(frame, referee["bbox"], (255, 0, 0), None)

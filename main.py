@@ -1,6 +1,7 @@
 from utilities import read_video, save_video
 from trackers import Tracker
 from team_assigner import TeamAssigner
+from player_possession_assigner import PlayerPossessionAssigner
 
 def main():
     # Read the video
@@ -8,7 +9,6 @@ def main():
 
     # Initialize the tracker
     tracker = Tracker('models/best.pt')
-
     tracks = tracker.get_object_tracks(video_frames, read_from_stub=True, stub_path='stubs/track_stubs.pkl')
 
     # Interpolate missing ball positions
@@ -23,6 +23,15 @@ def main():
             team = team_assigner.get_player_team(video_frames[frame_num], track['bbox'], player_id)
             tracks['players'][frame_num][player_id]['team'] = team
             tracks['players'][frame_num][player_id]['team_color'] = team_assigner.team_colors[team]
+
+    # Assign possession to player who currently holds the ball
+    player_assigner = PlayerPossessionAssigner()
+    for frame_num, player_track in enumerate(tracks['players']):
+        ball_bbox = tracks['ball'][frame_num][1]['bbox']
+        assigned_player = player_assigner.assign_possession_to_player(player_track, ball_bbox)
+
+        if assigned_player is not None:
+            tracks['players'][frame_num][assigned_player]['has_ball'] = True
 
     # Draw the circles under the players and refs on the video frames
     output_video_frames = tracker.draw_tracking_markers(video_frames, tracks)
