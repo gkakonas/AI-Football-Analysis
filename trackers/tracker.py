@@ -5,6 +5,7 @@ import os
 import cv2
 import sys
 import numpy as np
+import pandas as pd
 sys.path.append('../')
 from utilities import get_center_bbox, get_width_bbox
 
@@ -12,6 +13,18 @@ class Tracker:
     def __init__(self, model_path):
         self.model= YOLO(model_path)
         self.tracker = sv.ByteTrack()
+
+    def ball_interpolation(self, ball_positions):
+        ball_positions = [x.get(1, {}).get('bbox', []) for x in ball_positions]
+        df_ball_positions = pd.DataFrame(ball_positions, columns = ['x1', 'y1', 'x2', 'y2'])
+
+        df_ball_positions = df_ball_positions.interpolate()
+        # Backfill for edge cases
+        df_ball_positions = df_ball_positions.bfill() 
+
+        ball_positions = [{1: {"bbox":x}} for x in df_ball_positions.to_numpy().tolist()]
+
+        return ball_positions
 
     def detect_frames(self, frames):
         batch_size = 20
@@ -129,7 +142,6 @@ class Tracker:
 
 
         return frame
-
 
     def draw_triangle(self, frame, bbox, color):
         y = int(bbox[1])
